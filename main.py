@@ -1,7 +1,27 @@
-#!/usr/bin/env python3
 
+
+from time import sleep
 import requests
 import re
+import json
+import os
+
+def write_data(new_data):
+    file_path = 'data.json'
+    
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as f:
+            try:
+                existing_data = json.load(f)
+            except json.JSONDecodeError:
+                existing_data = []
+    else:
+        existing_data = []
+
+    existing_data.append(new_data)
+
+    with open(file_path, 'w') as f:
+        json.dump(existing_data, f, indent=4)
 
 dtc_list = []
 
@@ -11,7 +31,8 @@ for i in response.json():
     dtc_list.append(i['name'])
 
 
-for dtc in dtc_list[:2]:
+for dtc in dtc_list:
+    sleep(4)
     url2 = "https://rsa.powerappsportals.com/return-last-estimation/"
     payload = {'pdtcname': dtc}
     response = requests.post(url2, data=payload)
@@ -23,10 +44,8 @@ for dtc in dtc_list[:2]:
     response = requests.get(url3)
 
     if response.status_code == 200:
-        # Get the HTML content of the response
         html_content = response.text
 
-        # Define a regex pattern to capture the name and dates
         pattern = re.compile(
             r'\$\("#lbl-tc-testcentre"\)\.text\("([^"]+)"\);.*?'
             r'\$\("#lbl-tc-expectedinvite"\)\.text\(moment\(new Date\("([^"]+)"\)\)\.format\("DD/MM/YYYY"\)\);.*?'
@@ -34,16 +53,19 @@ for dtc in dtc_list[:2]:
             re.DOTALL
         )
 
-        # Search for the pattern in the HTML content
         match = pattern.search(html_content)
 
         if match:
             name = match.group(1)
             date1 = match.group(2)
             date2 = match.group(3)
-            print(f"Test Centre: {name}")
-            print(f"Expected Invite: {date1}")
-            print(f"Last Updated: {date2}")
+            data = {
+                "Test Centre": name,
+                "Expected Invite": date1,
+                "Last Updated": date2
+            }
+
+            write_data(data)
         else:
             print("No matches found.")
     else:
