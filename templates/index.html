@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driving Test Booking Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div x-data="testCenters()" x-init="fetchData()" class="container mx-auto px-4 py-8">
+        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-center text-indigo-600">Driving Test Booking Checker</h1>
+        <h3 class="text-lg sm:text-xl font-semibold mb-4 text-center text-gray-600">Find out when you can book your RSA driving test</h3>
+        <h6 class="mb-4 text-center"><i>Last Updated: </i><i x-text="lastUpdatedDate"></i></h6>
+        
+        <div class="mb-6 flex flex-col space-y-4">
+            <input 
+                type="text" 
+                x-model="search" 
+                @input="fetchData"
+                placeholder="Search test centers..." 
+                class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                <select 
+                    x-model="sort" 
+                    @change="fetchData"
+                    class="w-full sm:w-1/2 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                    <option value="az">Sort A-Z</option>
+                    <option value="date">Sort by Date</option>
+                </select>
+                <select 
+                    x-model="order" 
+                    @change="fetchData"
+                    class="w-full sm:w-1/2 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="bg-white shadow-md rounded-lg overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Test Centre</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expected Invite</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <template x-for="center in testCenters" :key="center['Test Centre']">
+                        <tr>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm" x-text="center['Test Centre']"></td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm" x-text="formatDate(center['Expected Invite'])"></td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm" x-text="formatDate(center['Last Updated'])"></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function testCenters() {
+            return {
+                search: '',
+                sort: 'az',
+                order: 'asc',
+                testCenters: [],
+                async fetchData() {
+                    const response = await fetch(`/api/test-centers?search=${this.search}&sort=${this.sort}&order=${this.order}`);
+                    this.testCenters = await response.json();
+                    this.updateLastUpdatedDate();
+                },
+                formatDate(dateString) {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                },
+                updateLastUpdatedDate() {
+                    if (this.testCenters.length > 0) {
+                        const earliestDate = this.testCenters.reduce((earliest, center) => {
+                            const centerDate = new Date(center['Last Updated']);
+                            return centerDate < earliest ? centerDate : earliest;
+                        }, new Date(this.testCenters[0]['Last Updated']));
+                        this.lastUpdatedDate = this.formatDate(earliestDate);
+                    } else {
+                        this.lastUpdatedDate = 'N/A';
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
