@@ -1,7 +1,5 @@
 node_modules
 old
-.dockerignore
-.dockerfile
 npm-debug.log
 yarn-error.log
 README.md

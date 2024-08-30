@@ -4,3 +4,4 @@ gunicorn
 flask_cors
 schedule
 apscheduler
+flask_restx
