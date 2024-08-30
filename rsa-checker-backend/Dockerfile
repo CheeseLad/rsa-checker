@@ -7,6 +7,8 @@ RUN pip3 install -r requirements.txt
 
 COPY . .
 
+RUN chmod +x run_backend.sh
+
 EXPOSE 5000
 
-CMD ["gunicorn", "--bind", "127.0.0.1:5000", "wsgi:app", "-w", "4"]
+CMD ["./run_backend.sh"]
