@@ -1,4 +1,4 @@
-name: Build & Publish Docker Image
+name: Build & Publish Docker Image (Backend)
 
 env:
   REGISTRY: ghcr.io
@@ -40,7 +40,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./rsa-checker-backend
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

@@ -1,2 +1,23 @@
 __pycache__
+
+node_modules
+
+# Output
+.output
+.vercel
+/rsa-checker-frontend/.svelte-kit
+/rsa-checker-frontend/build
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
 .env
+.env.*
+!.env.example
+!.env.test
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
